@@ -10,6 +10,7 @@ module.exports = {
   createTags,
   createUser,
   getAllPosts,
+  getAllTags,
   getAllUsers,
   getPostsByTagName,
   getPostsByUser,
@@ -321,6 +322,34 @@ async function getPostsByTagName(tagName) {
     return await Promise.all(postIds.map(
       post => getPostById(post.id)
     ));
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getAllTags(){
+  try {
+    const tags = await client.query(`
+      SELECT * FROM tags;
+    `);
+    return tags;
+  } catch (error){
+    throw error;
+  }
+}
+
+async function getAllPosts() {
+  try {
+    const { rows: postIds } = await client.query(`
+      SELECT id
+      FROM posts;
+    `);
+
+    const posts = await Promise.all(postIds.map(
+      post => getPostById(post.id)
+    ));
+
+    return posts;
   } catch (error) {
     throw error;
   }
