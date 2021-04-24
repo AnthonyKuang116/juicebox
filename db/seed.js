@@ -71,21 +71,19 @@ async function createTables() {
   }
 }
 
-
-
 //function should attempt to create a few users
 async function createInitialUsers() {
   try {
     console.log("Starting to create users...");
 
-    const albert = await createUser({ username: 'albert', password: 'bertie99', name: 'albert', location: 'Texas'});
-    const sandra = await createUser({ username: 'sandra', password: '2sandy4me', name: 'sandra', location: 'Virginia'});
-    const glamgal = await createUser({ username: 'glamgal', password: 'soglam', name: 'gloria', location: 'New York'});
-    
+    const albert = await createUser({ username: 'albert', password: 'bertie99', name: 'albert', location: 'Texas' });
+    const sandra = await createUser({ username: 'sandra', password: '2sandy4me', name: 'sandra', location: 'Virginia' });
+    const glamgal = await createUser({ username: 'glamgal', password: 'soglam', name: 'gloria', location: 'New York' });
+
     console.log(albert, sandra, glamgal);
 
     console.log("Finished creating users!");
-  } catch(error) {
+  } catch (error) {
     console.error("Error creating users!");
     throw error;
   }
@@ -177,7 +175,7 @@ async function rebuildDB() {
     await createInitialUsers();
     await createInitialPosts();
   } catch (error) {
-    console.log("Error during rebuildDB") 
+    console.log("Error during rebuildDB")
     throw error;
   }
 }

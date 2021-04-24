@@ -7,97 +7,97 @@ const jwt = require('jsonwebtoken');
 const token = process.env.JWT_SECRET
 
 usersRouter.use((req, res, next) => {
-    console.log("A request is being made to /users");
-    next();
+  console.log("A request is being made to /users");
+  next();
 });
 
 usersRouter.get('/', async (req, res) => {
-    const users = await getAllUsers();
+  const users = await getAllUsers();
 
-    res.send({
-        users
-    });
+  res.send({
+    users
+  });
 })
 
 usersRouter.post('/login', async (req, res, next) => {
-    const { username, password } = req.body;
+  const { username, password } = req.body;
 
-    // request must have both
-    if (!username || !password) {
-        next({
-            name: "MissingCredentialsError",
-            message: "Please supply both a username and password"
-        });
+  // request must have both
+  if (!username || !password) {
+    next({
+      name: "MissingCredentialsError",
+      message: "Please supply both a username and password"
+    });
+  }
+
+  try {
+    const user = await getUserByUsername(username);
+
+    if (user && user.password == password) {
+      // create token & return to user
+      res.send({ message: "you're logged in!", token: encodeData(user.id, user.username) });
+    } else {
+      next({
+        name: 'IncorrectCredentialsError',
+        message: 'Username or password is incorrect'
+      });
     }
-
-    try {
-        const user = await getUserByUsername(username);
-
-        if (user && user.password == password) {
-            // create token & return to user
-            res.send({ message: "you're logged in!", token: encodeData(user.id, user.username)});
-        } else {
-            next({
-                name: 'IncorrectCredentialsError',
-                message: 'Username or password is incorrect'
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        next(error);
-    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 });
 
 usersRouter.post('/register', async (req, res, next) => {
-    const { username, password, name, location } = req.body;
-  
-    try {
-      const _user = await getUserByUsername(username);
-  
-      if (_user) {
-        next({
-          name: 'UserExistsError',
-          message: 'A user by that username already exists'
-        });
-      }
-  
-      const user = await createUser({
-        username,
-        password,
-        name,
-        location,
-      });
-  
-      const token = jwt.sign({ 
-        id: user.id, 
-        username
-      }, process.env.JWT_SECRET, {
-        expiresIn: '1w'
-      });
-  
-      res.send({ 
-        message: "thank you for signing up",
-        token 
-      });
-    } catch ({ name, message }) {
-      next({ name, message })
-    } 
-  });
+  const { username, password, name, location } = req.body;
 
-function encodeData(id, username){
-    const encoded = jwt.sign(
-        {id, username},
-        token
-    );
-    return encoded;
+  try {
+    const _user = await getUserByUsername(username);
+
+    if (_user) {
+      next({
+        name: 'UserExistsError',
+        message: 'A user by that username already exists'
+      });
+    }
+
+    const user = await createUser({
+      username,
+      password,
+      name,
+      location,
+    });
+
+    const token = jwt.sign({
+      id: user.id,
+      username
+    }, process.env.JWT_SECRET, {
+      expiresIn: '1w'
+    });
+
+    res.send({
+      message: "thank you for signing up",
+      token
+    });
+  } catch ({ name, message }) {
+    next({ name, message })
+  }
+});
+
+function encodeData(id, username) {
+  const encoded = jwt.sign(
+    { id, username },
+    token
+  );
+  return encoded;
 }
 
-function decodeData(id, username){
-    const data = jwt.verify(
-        {id, username},
-        token
-    );
-    return data;
+function decodeData(id, username) {
+  const data = jwt.verify(
+    { id, username },
+    token
+  );
+  return data;
 }
 
 module.exports = usersRouter, encodeData, decodeData;
